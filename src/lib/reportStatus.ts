@@ -15,5 +15,5 @@ export const STATUS_COLOR: Record<ReportStatus, { background: string; color: str
 };
 
 export const LABEL_TO_STATUS: Record<string, ReportStatus> = Object.fromEntries(
-  Object.entries(STATUS_LABEL).map(([status, label]) => [status as ReportStatus, label] as const).map(([status, label]) => [label, status])
+  Object.entries(STATUS_LABEL).map(([status, label]) => [label, status as ReportStatus])
 );
