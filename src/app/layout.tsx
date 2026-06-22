@@ -11,7 +11,11 @@ const tajawal = Tajawal({
 export const metadata: Metadata = {
   title: "حلقة معاهدة القران الكريم",
   description: "منصة إدارة حلقة معاهدة القران الكريم",
-  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "الحلقة",
+  },
 };
 
 export const viewport: Viewport = {
