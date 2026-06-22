@@ -31,7 +31,7 @@ export async function requestLoginCode(formData: FormData): Promise<ActionResult
   return { ok: true };
 }
 
-// يتحقق من الرمز المُدخل، وعنح النجاح ينشئ ستجل الطالب (إن لم يكن موجوداً) ويوجّهه للصفحة المناسبة
+// يتحقق من الرمز المُدخل، وعند النجاح ينشئ ستجل الطالب (إن لم يكن موجوداً) ويوجّهه للصفحة المناسبة
 export async function verifyLoginCode(
   email: string,
   fullName: string,
