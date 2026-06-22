@@ -57,6 +57,19 @@ export function formatKuwaitNow(date: Date = new Date()): string {
   }).format(date);
 }
 
+// نص عربي للتاريخ والوقت لطابع زمني محدد (وليس الآن) بتوقيت الكويت
+export function formatKuwaitDateTime(isoString: string): string {
+  return new Intl.DateTimeFormat("ar-KW", {
+    timeZone: KUWAIT_TZ,
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(isoString));
+}
+
 export type DayType = "hifz" | "tasmee" | "review" | "off";
 
 // نوع اليوم الحالي بناءً على إعدادات الحلقة: تسميع / حفظ منزلي / مراجعة شاملة (سبت) / إجازة

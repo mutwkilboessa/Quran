@@ -44,3 +44,17 @@ export async function getSessionRole(): Promise<SessionRole> {
   }
   return { kind: "pending", studentId: student.id, fullName: student.full_name };
 }
+
+// يُستدعى من بدايات Server Actions الخاصة بالمعلم لمنع أي استدعاء الت مخوّل
+export async function requireTeacher() {
+  const role = await getSessionRole();
+  if (role.kind !== "teacher") throw new Error("عير مخوّل - هذه العملية للمعلم فقط");
+  return role;
+}
+
+// يُستدعى من بدايات Server Actions الخاصة بالطالب المفعّل (مثل تسجيل المراجعة الذاتية)
+export async function requireApprovedStudent() {
+  const role = await getSessionRole();
+  if (role.kind !== "approved") throw new Error("عير مخوّل");
+  return role;
+}
