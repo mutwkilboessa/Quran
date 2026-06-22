@@ -1,20 +1,29 @@
 "use client";
 
-import { useState, useTransition, type FormEvent } from "react";
-import { requestLoginCode, verifyLoginCode } from "./actions";
+import { Suspense, useState, useTransition, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
+import { requestLoginCode } from "./actions";
 import { Icon } from "@/components/icons";
 
-type Step = "email" | "otp";
+type Step = "email" | "sent";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>("email");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(searchParams.get("error"));
   const [isPending, startTransition] = useTransition();
 
-  function handleSendCode(e: FormEvent) {
+  function handleSendLink(e: FormEvent) {
     e.preventDefault();
     setError(null);
     const formData = new FormData();
@@ -23,16 +32,7 @@ export default function LoginPage() {
     startTransition(async () => {
       const result = await requestLoginCode(formData);
       if ("error" in result) setError(result.error);
-      else setStep("otp");
-    });
-  }
-
-  function handleVerify(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    startTransition(async () => {
-      const result = await verifyLoginCode(email, fullName, code);
-      if (result && "error" in result) setError(result.error);
+      else setStep("sent");
     });
   }
 
@@ -58,12 +58,12 @@ export default function LoginPage() {
           <p className="text-sm" style={{ color: "var(--color-subtext)" }}>
             {step === "email"
               ? "سجّل دخولك بالبريد الإلكتروني"
-              : "أدخل رمز التحقق المرسل إلى بريدك"}
+              : "تحقق من بريدك الإلكتروني"}
           </p>
         </div>
 
         {step === "email" ? (
-          <form onSubmit={handleSendCode} className="flex flex-col gap-4">
+          <form onSubmit={handleSendLink} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
                 الاسم الكامل
@@ -103,40 +103,23 @@ export default function LoginPage() {
               className="mt-2 rounded-lg py-2.5 text-sm font-semibold text-white disabled:opacity-60"
               style={{ background: "var(--color-green)" }}
             >
-              {isPending ? "جارٍ الإرسال..." : "إرسال رمز التحقق"}
+              {isPending ? "جارٍ الإرسال..." : "إرسال رابط الدخول"}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleVerify} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
-                رمز التحقق
-              </label>
-              <input
-                required
-                inputMode="numeric"
-                maxLength={6}
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="rounded-lg border px-3 py-2.5 text-center text-lg tracking-widest outline-none"
-                style={{ borderColor: "var(--color-border)" }}
-                placeholder="------"
-                dir="ltr"
-              />
-            </div>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-sm" style={{ color: "var(--color-text)" }}>
+              أرسلنا رابط دخول إلى بريدك الإلكتروني{" "}
+              <span dir="ltr" className="font-semibold">
+                {email}
+              </span>
+              . اضغط على الرابط لإكمال تسجيل الدخول.
+            </p>
             {error && (
               <p className="text-sm" style={{ color: "var(--color-red)" }}>
                 {error}
               </p>
             )}
-            <button
-              type="submit"
-              disabled={isPending}
-              className="mt-2 rounded-lg py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-              style={{ background: "var(--color-green)" }}
-            >
-              {isPending ? "جارٍ التحقق..." : "تأكيد الدخول"}
-            </button>
             <button
               type="button"
               onClick={() => setStep("email")}
@@ -146,7 +129,7 @@ export default function LoginPage() {
               <Icon.ChevronLeft size={16} />
               تعديل البريد الإلكتروني
             </button>
-          </form>
+          </div>
         )}
       </div>
     </main>
