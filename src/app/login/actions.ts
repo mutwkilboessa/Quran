@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 type ActionResult = { error: string } | { ok: true };
@@ -14,8 +13,11 @@ export async function requestLoginCode(formData: FormData): Promise<ActionResult
     return { error: "الرجاء إدخال الاسم والبريد الإلكتروني" };
   }
 
-  const requestHeaders = await headers();
-  const origin = requestHeaders.get("origin") ?? `https://${requestHeaders.get("host")}`;
+  // رابط ثابت دائماً، بدل الاعتماد على الدومين الذي فُتحت منه الصفحة (قد يكون دومين قديم معطّل محفوظ كإشارة مرجعية)
+  const origin = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!origin) {
+    return { error: "خطأ في إعدادات الموقع، تواصل مع المعلم" };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
